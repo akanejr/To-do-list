@@ -1,0 +1,24 @@
+{
+  "name": "swiftline-customer-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Phase 1 customer prototype — local delivery & logistics marketplace (Nigeria)",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "check:matching": "esbuild scripts/check-matching.mjs --bundle --platform=node --loader:.jpg=dataurl --format=esm --outfile=node_modules/.cache/check.mjs --log-level=error && node node_modules/.cache/check.mjs",
+    "check:smoke": "esbuild scripts/smoke.mjs --bundle --platform=node --jsx=automatic --loader:.jpg=dataurl --format=esm --external:jsdom --external:react --external:react-dom --external:react-router-dom --outfile=smoke.tmp.mjs --log-level=error && node smoke.tmp.mjs; ec=$?; rm -f smoke.tmp.mjs; exit $ec"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.8"
+  }
+}
