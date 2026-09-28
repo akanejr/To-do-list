@@ -28,15 +28,16 @@ const StoreContext = createContext(null);
 function loadPersisted() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { bookings: [], draft: null, selectedPartnerId: null };
+    if (!raw) return { bookings: [], draft: null, selectedPartnerId: null, step: 0 };
     const parsed = JSON.parse(raw);
     return {
       bookings: Array.isArray(parsed.bookings) ? parsed.bookings : [],
       draft: parsed.draft && typeof parsed.draft === 'object' ? parsed.draft : null,
       selectedPartnerId: parsed.selectedPartnerId || null,
+      step: Number.isInteger(parsed.step) ? parsed.step : 0,
     };
   } catch {
-    return { bookings: [], draft: null, selectedPartnerId: null };
+    return { bookings: [], draft: null, selectedPartnerId: null, step: 0 };
   }
 }
 
@@ -46,19 +47,19 @@ export function StoreProvider({ children }) {
   const [draft, setDraft] = useState(() => ({ ...emptyDraft(), ...(initial.draft || {}) }));
   const [selectedPartnerId, setSelectedPartnerId] = useState(initial.selectedPartnerId);
   const [userBookings, setUserBookings] = useState(initial.bookings);
-  const [step, setStep] = useState(0); // create-delivery wizard step
+  const [step, setStep] = useState(initial.step); // create-delivery wizard step
 
   // Persist user-created bookings + draft (never the seeded mocks).
   useEffect(() => {
     try {
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ bookings: userBookings, draft, selectedPartnerId }),
+        JSON.stringify({ bookings: userBookings, draft, selectedPartnerId, step }),
       );
     } catch {
       /* storage unavailable — prototype continues in memory */
     }
-  }, [userBookings, draft, selectedPartnerId]);
+  }, [userBookings, draft, selectedPartnerId, step]);
 
   const updateDraft = useCallback((updater) => {
     setDraft((prev) => {

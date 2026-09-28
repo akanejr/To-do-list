@@ -46,15 +46,21 @@ const draft = {
   package: { size: 'small', weightKg: '3', description: 'Sealed carton of shoes', fragile: false },
   schedule: { mode: 'asap', date: '', time: '' },
 };
-localStorage.setItem(
-  'swiftline.phase1.v1',
-  JSON.stringify({ bookings: [], draft, selectedPartnerId: 'mike' }),
-);
+const seed = (over = {}) =>
+  localStorage.setItem(
+    'swiftline.phase1.v1',
+    JSON.stringify({ bookings: [], draft, selectedPartnerId: 'mike', step: 0, ...over }),
+  );
+seed();
 
 const CASES = [
+  // [path, expected substrings, optional persisted-state override]
   ['/', ['SwiftLine']],
   ['/home', ['How can we help you today?', 'Send a package', 'Saved addresses', 'Recent deliveries', 'Track delivery', 'Documents']],
-  ['/send', ['Where should we pick up from?', 'Continue', 'Step 1 of 4']],
+  ['/send', ['Where should we pick up from?', 'Pickup area', 'Contact phone', 'Continue', 'Step 1 of 4']],
+  ['/send', ['Where is it going?', 'Recipient name', 'Delivery area', 'Step 2 of 4'], { step: 1 }],
+  ['/send', ['Tell us about the package', 'Small parcel', 'Package size', 'Fragile', 'Step 3 of 4'], { step: 2 }],
+  ['/send', ['When should we collect it?', 'As soon as possible', 'Schedule pickup', 'See delivery estimate'], { step: 3 }],
   ['/estimate', ['Estimated price', 'Find delivery partners', 'Rumuola', 'Waterlines', 'Distance']],
   ['/partners', ['Available partners', 'View profile', 'Select', 'match', 'deliveries']],
   ['/partners/mike', ['Mike Okonkwo', 'Customer reviews', 'Select this partner', 'Service area', 'Package capacity']],
@@ -67,7 +73,8 @@ const CASES = [
 ];
 
 let failed = 0;
-for (const [path, expects] of CASES) {
+for (const [path, expects, over] of CASES) {
+  seed(over);
   try {
     const html = renderToString(
       React.createElement(MemoryRouter, { initialEntries: [path] }, React.createElement(App)),
@@ -86,5 +93,6 @@ for (const [path, expects] of CASES) {
   }
 }
 
+seed();
 console.log(failed === 0 ? '\nAll routes rendered with expected content.' : `\n${failed} route(s) failed.`);
 process.exit(failed === 0 ? 0 : 1);
